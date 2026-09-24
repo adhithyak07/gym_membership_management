@@ -1,16 +1,36 @@
 import os
 import logging
-from supabase import create_client
-from dotenv import load_dotenv
 from datetime import datetime, date
 
-# -------------------- Setup --------------------
-logging.basicConfig(level=logging.INFO)
+from dotenv import load_dotenv
+from supabase import create_client
+
 load_dotenv()
+
+# Local .env
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
-supabase = create_client(url, key)
 
+# Streamlit Cloud
+try:
+    import streamlit as st
+
+    if "SUPABASE_URL" in st.secrets:
+        url = st.secrets["SUPABASE_URL"]
+
+    if "SUPABASE_KEY" in st.secrets:
+        key = st.secrets["SUPABASE_KEY"]
+
+except Exception:
+    pass
+
+if not url:
+    raise RuntimeError("SUPABASE_URL is missing")
+
+if not key:
+    raise RuntimeError("SUPABASE_KEY is missing")
+
+supabase = create_client(url, key)
 # -------------------- Utility --------------------
 def to_iso(value):
     """Convert date/datetime to ISO string."""
